@@ -44,13 +44,6 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- My Opts
-
--- Tab Size
-vim.opt.tabstop = 4
-vim.opt.expandtab = false
-
-
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -75,6 +68,9 @@ vim.opt.rtp:prepend(lazypath)
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
+
+  -- Go
+  
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -295,6 +291,15 @@ require('lazy').setup({
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
+
+-- My Opts
+
+-- Tab Size
+vim.opt.tabstop = 4
+vim.opt.expandtab = false
+
+-- .zshrc
+vim.opt.shell = 'zsh -is'
 
 -- Set highlight on search
 vim.o.hlsearch = false
