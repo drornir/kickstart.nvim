@@ -605,10 +605,13 @@ require('mason-lspconfig').setup()
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {},
+  pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+  autotools_ls = {},
+  marksman = { filetypes = { 'markdown' } },
+  grammarly = { filetype = { 'markdown' } },
 
   lua_ls = {
     Lua = {
