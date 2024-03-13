@@ -227,7 +227,7 @@ require('lazy').setup({
     -- See `:help lualine.txt`
     opts = {
       options = {
-        icons_enabled = false,
+        icons_enabled = true,
         theme = 'auto',
         component_separators = '|',
         section_separators = '',
@@ -288,6 +288,23 @@ require('lazy').setup({
     opts = {
       -- configuration here or empty for defaults
     },
+  },
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup({
+        gofmt = 'gofumpt',
+        tag_tansform = "snakecase",
+      })
+    end,
+    event = { "CmdlineEnter" },
+    ft = { "go", 'gomod' },
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
   }
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
@@ -303,6 +320,9 @@ require('lazy').setup({
 -- NOTE: You can change these options as you wish!
 
 -- My Opts
+
+-- Line Numbers
+vim.opt.relativenumber = true
 
 -- Tab Size
 vim.opt.tabstop = 4
@@ -463,10 +483,10 @@ vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
     ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim',
-      'bash' },
+      'bash', 'markdown', 'markdown_inline' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-    auto_install = false,
+    auto_install = true,
     -- Install languages synchronously (only applied to `ensure_installed`)
     sync_install = false,
     -- List of parsers to ignore installing
@@ -578,6 +598,16 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
+-- local format_sync_grp = vim.api.nvim_create_augroup("GoFormat", {})
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--   pattern = "*.go",
+--   callback = function()
+--     require('go.format').goimport()
+--   end,
+--   group = format_sync_grp,
+-- })
+
+
 -- document existing key chains
 require('which-key').register {
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
@@ -659,7 +689,7 @@ mason_lspconfig.setup_handlers {
 -- See `:help cmp`
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
-require('luasnip.loaders.from_vscode').lazy_load()
+-- require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
 
 cmp.setup {
@@ -678,8 +708,8 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
+      behavior = cmp.ConfirmBehavior.Insert,
+      select = false,
     },
     ['<Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
@@ -706,6 +736,69 @@ cmp.setup {
     { name = 'path' },
   },
 }
+
+-- Configure [[markdown]]
+require("markdown").setup({
+  -- Disable all keymaps by setting mappings field to 'false'.
+  -- Selectively disable keymaps by setting corresponding field to 'false'.
+  mappings = {
+    inline_surround_toggle = "gs",       -- (string|boolean) toggle inline style
+    inline_surround_toggle_line = "gss", -- (string|boolean) line-wise toggle inline style
+    inline_surround_delete = "ds",       -- (string|boolean) delete emphasis surrounding cursor
+    inline_surround_change = "cs",       -- (string|boolean) change emphasis surrounding cursor
+    link_add = "gl",                     -- (string|boolean) add link
+    link_follow = "gx",                  -- (string|boolean) follow link
+    go_curr_heading = "]c",              -- (string|boolean) set cursor to current section heading
+    go_parent_heading = "]p",            -- (string|boolean) set cursor to parent section heading
+    go_next_heading = "]]",              -- (string|boolean) set cursor to next section heading
+    go_prev_heading = "[[",              -- (string|boolean) set cursor to previous section heading
+  },
+  inline_surround = {
+    -- For the emphasis, strong, strikethrough, and code fields:
+    -- * 'key': used to specify an inline style in toggle, delete, and change operations
+    -- * 'txt': text inserted when toggling or changing to the corresponding inline style
+    emphasis = {
+      key = "i",
+      txt = "*",
+    },
+    strong = {
+      key = "b",
+      txt = "**",
+    },
+    strikethrough = {
+      key = "s",
+      txt = "~~",
+    },
+    code = {
+      key = "c",
+      txt = "`",
+    },
+  },
+  link = {
+    paste = {
+      enable = true, -- whether to convert URLs to links on paste
+    },
+  },
+  toc = {
+    -- Comment text to flag headings/sections for omission in table of contents.
+    omit_heading = "toc omit heading",
+    omit_section = "toc omit section",
+    -- Cycling list markers to use in table of contents.
+    -- Use '.' and ')' for ordered lists.
+    markers = { "-" },
+  },
+  -- Hook functions allow for overriding or extending default behavior.
+  -- Called with a table of options and a fallback function with default behavior.
+  -- Signature: fun(opts: table, fallback: fun())
+  hooks = {
+    -- Called when following links. Provided the following options:
+    -- * 'dest' (string): the link destination
+    -- * 'use_default_app' (boolean|nil): whether to open the destination with default application
+    --   (refer to documentation on <Plug> mappings for explanation of when this option is used)
+    follow_link = nil,
+  },
+  on_attach = nil, -- (fun(bufnr: integer)) callback when plugin attaches to a buffer
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
